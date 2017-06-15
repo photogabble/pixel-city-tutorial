@@ -9,6 +9,8 @@ func main() {
 		States: NewStack(),
 	}
 
+	game.LoadTextures()
+	game.SpriteManager.Debug()
 	game.PushState(NewMenuState(&game))
 
 	pixelgl.Run(game.GameLoop)

@@ -7,8 +7,9 @@ import (
 )
 
 type Game struct {
-	States    *stack
-	Window    *pixelgl.Window
+	States        *stack
+	Window        *pixelgl.Window
+	SpriteManager *SpriteManager
 }
 
 func (g *Game) PushState(state GameState) {
@@ -31,6 +32,49 @@ func (g *Game) PeekState() GameState {
 		return nil
 	}
 	return g.States.Peek().(GameState)
+}
+
+func (g *Game) LoadTextures() {
+	if g.SpriteManager == nil {
+		g.SpriteManager = NewSpriteManager()
+	}
+
+	var r error
+
+	r = g.SpriteManager.LoadTexture("grass", "assets/grass.png")
+	if r != nil {
+		panic(r)
+	}
+
+	r = g.SpriteManager.LoadTexture("forest", "assets/forest.png")
+	if r != nil {
+		panic(r)
+	}
+
+	r = g.SpriteManager.LoadTexture("water", "assets/water.png")
+	if r != nil {
+		panic(r)
+	}
+
+	r = g.SpriteManager.LoadTexture("residential", "assets/residential.png")
+	if r != nil {
+		panic(r)
+	}
+
+	r = g.SpriteManager.LoadTexture("commercial", "assets/commercial.png")
+	if r != nil {
+		panic(r)
+	}
+
+	r = g.SpriteManager.LoadTexture("industrial", "assets/industrial.png")
+	if r != nil {
+		panic(r)
+	}
+
+	r = g.SpriteManager.LoadTexture("road", "assets/road.png")
+	if r != nil {
+		panic(r)
+	}
 }
 
 func (g *Game) GameLoop() {
