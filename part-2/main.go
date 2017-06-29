@@ -10,8 +10,8 @@ func main() {
 	}
 
 	game.LoadTextures()
-	game.SpriteManager.Debug()
-	game.PushState(NewMenuState(&game))
+	//game.SpriteManager.Debug()
+	game.PushState(NewSpriteSheetTestState(&game))
 
 	pixelgl.Run(game.GameLoop)
 }

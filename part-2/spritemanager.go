@@ -110,6 +110,10 @@ func (sM *SpriteManager) LoadTexture(name string, relativePath string) (error) {
 	return nil
 }
 
+func (sM SpriteManager) GetSpriteSheet() pixel.Picture {
+	return pixel.PictureDataFromImage(sM.spriteSheet)
+}
+
 func (sM *SpriteManager) Debug() {
 	for k, v := range sM.sprites {
 		fmt.Printf("%s -> %+v\n", k, v)
