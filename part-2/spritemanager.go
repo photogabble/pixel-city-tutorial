@@ -42,9 +42,9 @@ func (sM SpriteManager) decodePixelsFromImage(img image.Image, offsetX, offsetY 
 // https://stackoverflow.com/questions/35964656/golang-how-to-concatenate-append-images-to-one-another
 func (sM *SpriteManager) appendToSpriteSheet(img image.Image) {
 	// collect pixel data from each image
-	pixels1 := sM.decodePixelsFromImage(sM.spriteSheet, 0, 0)
+	pixels1 := sM.decodePixelsFromImage(img, 0, 0)
 	// the second image has a Y-offset of sM.spriteSheet's max Y (appended at bottom)
-	pixels2 := sM.decodePixelsFromImage(img, 0, sM.spriteSheet.Bounds().Max.Y)
+	pixels2 := sM.decodePixelsFromImage(sM.spriteSheet, 0, img.Bounds().Max.Y)
 
 	pixelSum := append(pixels1, pixels2...)
 
