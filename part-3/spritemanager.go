@@ -23,6 +23,7 @@ type SpriteManager struct {
 	sprites		map[string]Sprite
 	yOffset		int
 	spriteSheet image.Image
+	spriteSheetPicture pixel.Picture
 }
 
 func (sM SpriteManager) decodePixelsFromImage(img image.Image, offsetX, offsetY int) []*Pixel {
@@ -42,9 +43,9 @@ func (sM SpriteManager) decodePixelsFromImage(img image.Image, offsetX, offsetY 
 // https://stackoverflow.com/questions/35964656/golang-how-to-concatenate-append-images-to-one-another
 func (sM *SpriteManager) appendToSpriteSheet(img image.Image) {
 	// collect pixel data from each image
-	pixels1 := sM.decodePixelsFromImage(sM.spriteSheet, 0, 0)
+	pixels1 := sM.decodePixelsFromImage(img, 0, 0)
 	// the second image has a Y-offset of sM.spriteSheet's max Y (appended at bottom)
-	pixels2 := sM.decodePixelsFromImage(img, 0, sM.spriteSheet.Bounds().Max.Y)
+	pixels2 := sM.decodePixelsFromImage(sM.spriteSheet, 0, img.Bounds().Max.Y)
 
 	pixelSum := append(pixels1, pixels2...)
 
@@ -96,22 +97,40 @@ func (sM *SpriteManager) LoadTexture(name string, relativePath string) (error) {
 		return err
 	}
 
+	rect := pixel.R(float64(0), float64(img.Bounds().Min.Y + sM.yOffset), float64(img.Bounds().Max.X), float64(img.Bounds().Max.Y + sM.yOffset))
+
 	if sM.spriteSheet == nil {
 		sM.bootSpriteSheet(img)
 	} else {
 		sM.appendToSpriteSheet(img)
 	}
 
-	fmt.Println("Added [", name ,"] new spritesheet dimensions W:", sM.spriteSheet.Bounds().Dx(), "H:", sM.spriteSheet.Bounds().Dy())
+	fmt.Println("Added [", name ,"] Bounds [(",rect.Min.X,",", rect.Min.Y,"),(",rect.Max.X,",",rect.Max.Y,")] new spritesheet dimensions W:", sM.spriteSheet.Bounds().Dx(), "H:", sM.spriteSheet.Bounds().Dy())
 
 	sM.sprites[name] = Sprite{
-		Bounds: pixel.R(float64(img.Bounds().Min.X), float64(img.Bounds().Min.Y + sM.yOffset), float64(img.Bounds().Max.X), float64(img.Bounds().Max.Y + sM.yOffset)),
+		Bounds: rect,
 	}
+	sM.spriteSheetPicture = nil
 	return nil
 }
 
-func (sM SpriteManager) GetSpriteSheet() pixel.Picture {
-	return pixel.PictureDataFromImage(sM.spriteSheet)
+func (sM *SpriteManager) GetSpriteSheet() pixel.Picture {
+	if sM.spriteSheetPicture == nil{
+		sM.spriteSheetPicture = pixel.PictureDataFromImage(sM.spriteSheet)
+	}
+	return sM.spriteSheetPicture
+}
+
+func (sM *SpriteManager) GetSprite(name string) pixel.Sprite {
+	return *pixel.NewSprite(sM.GetSpriteSheet(), sM.sprites[name].Bounds)
+}
+
+//
+// Returns a new Batch instance from the sprite sheet.
+// @todo document this for part three tutorial
+//
+func (sM SpriteManager) MakeBatch() *pixel.Batch {
+	return pixel.NewBatch(&pixel.TrianglesData{}, sM.GetSpriteSheet())
 }
 
 func (sM *SpriteManager) Debug() {

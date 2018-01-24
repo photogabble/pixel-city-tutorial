@@ -23,6 +23,7 @@ type SpriteManager struct {
 	sprites		map[string]Sprite
 	yOffset		int
 	spriteSheet image.Image
+	spriteSheetPicture pixel.Picture
 }
 
 func (sM SpriteManager) decodePixelsFromImage(img image.Image, offsetX, offsetY int) []*Pixel {
@@ -96,22 +97,32 @@ func (sM *SpriteManager) LoadTexture(name string, relativePath string) (error) {
 		return err
 	}
 
+	rect := pixel.R(float64(0), float64(img.Bounds().Min.Y + sM.yOffset), float64(img.Bounds().Max.X), float64(img.Bounds().Max.Y + sM.yOffset))
+
 	if sM.spriteSheet == nil {
 		sM.bootSpriteSheet(img)
 	} else {
 		sM.appendToSpriteSheet(img)
 	}
 
-	fmt.Println("Added [", name ,"] new spritesheet dimensions W:", sM.spriteSheet.Bounds().Dx(), "H:", sM.spriteSheet.Bounds().Dy())
+	fmt.Println("Added [", name ,"] Bounds [(",rect.Min.X,",", rect.Min.Y,"),(",rect.Max.X,",",rect.Max.Y,")] new spritesheet dimensions W:", sM.spriteSheet.Bounds().Dx(), "H:", sM.spriteSheet.Bounds().Dy())
 
 	sM.sprites[name] = Sprite{
-		Bounds: pixel.R(float64(img.Bounds().Min.X), float64(img.Bounds().Min.Y + sM.yOffset), float64(img.Bounds().Max.X), float64(img.Bounds().Max.Y + sM.yOffset)),
+		Bounds: rect,
 	}
+	sM.spriteSheetPicture = nil
 	return nil
 }
 
-func (sM SpriteManager) GetSpriteSheet() pixel.Picture {
-	return pixel.PictureDataFromImage(sM.spriteSheet)
+func (sM *SpriteManager) GetSpriteSheet() pixel.Picture {
+	if sM.spriteSheetPicture == nil{
+		sM.spriteSheetPicture = pixel.PictureDataFromImage(sM.spriteSheet)
+	}
+	return sM.spriteSheetPicture
+}
+
+func (sM *SpriteManager) GetSprite(name string) pixel.Sprite {
+	return *pixel.NewSprite(sM.GetSpriteSheet(), sM.sprites[name].Bounds)
 }
 
 func (sM *SpriteManager) Debug() {
